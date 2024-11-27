@@ -1,6 +1,8 @@
 "use client";
 import { GroupTypes, User } from "@/types";
 import { FC, PropsWithChildren } from "react";
+import { BsInbox, BsSearch } from "react-icons/bs";
+import { FiUsers } from "react-icons/fi";
 import Tabs from "../custom-ui/tabs";
 import GroupSearchBox from "./GroupSearchBox";
 import MemberList from "./MemberList";
@@ -28,9 +30,9 @@ const RightSidebar: FC<
       <div className="flex-grow">
         <Tabs
           data={[
-            { label: "Inbox", content: <div></div> },
+            { label: <BsInbox size={"20px"} />, content: <div></div> },
             {
-              label: "Member",
+              label: <FiUsers size={"20px"} />,
               content: (
                 <MemberList
                   groupId={groupId}
@@ -42,7 +44,7 @@ const RightSidebar: FC<
                 />
               ),
             },
-            { label: "Search", content: <div></div> },
+            { label: <BsSearch size={"20px"} />, content: <div></div> },
           ]}
         />
       </div>
