@@ -1,16 +1,16 @@
 import { GroupContext } from "@/context/GroupContext";
 import { Search, X } from "lucide-react";
-import { useContext, useState } from "react";
+import { ChangeEventHandler, useContext } from "react";
 
 const GroupSearchBox = () => {
-  const {
-    group,
-    privateChannelMembers,
-    isSideBarOpen,
-    setIsSideBarOpen,
-    windowWidth,
-  } = useContext(GroupContext);
-  const [searchWord, setSearchWord] = useState("");
+  const { isSideBarOpen, setIsSideBarOpen, setSearchWord } =
+    useContext(GroupContext);
+
+  const handleChange: ChangeEventHandler<HTMLInputElement> = (e) => {
+    if (setSearchWord) {
+      setSearchWord(e.target.value);
+    }
+  };
 
   return (
     <div className="w-full flex justify-between items-center py-2 px-4   rounded-full bg-gray-900 text-neutral-200 overflow-hidden">
@@ -24,7 +24,7 @@ const GroupSearchBox = () => {
       )}
       <input
         name="q"
-        onChange={(e) => setSearchWord(e.target.value)}
+        onChange={handleChange}
         className="bg-transparent outline-none w-full"
         placeholder="Search"
       />

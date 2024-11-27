@@ -1,7 +1,7 @@
 import GroupMemberItem from "@/components/groups/GroupMemberItem";
 import { GroupContext } from "@/context/GroupContext";
 import { User } from "@/types";
-import { useContext, useState } from "react";
+import { useContext } from "react";
 
 type Props = {
   isLoading: boolean;
@@ -17,8 +17,8 @@ function MemberTable({ admins, moderators, members, isLoading }: Props) {
     isSideBarOpen,
     setIsSideBarOpen,
     windowWidth,
+    searchWord,
   } = useContext(GroupContext);
-  const [q, setQ] = useState("");
 
   return (
     <div
@@ -31,11 +31,13 @@ function MemberTable({ admins, moderators, members, isLoading }: Props) {
       <div className="text-center p-2">{group?.group_name}</div>
       <div className="text-center ">{members?.length}</div>
       <>
-        {q ? (
+        {searchWord ? (
           members?.map((member, index) => {
             if (
-              member.lastName.toLowerCase().includes(q.toLowerCase()) ||
-              member.firstName.toLowerCase().includes(q.toLowerCase())
+              member.lastName
+                .toLowerCase()
+                .includes(searchWord.toLowerCase()) ||
+              member.firstName.toLowerCase().includes(searchWord.toLowerCase())
             ) {
               return <GroupMemberItem key={index} {...member} />;
             } else {
