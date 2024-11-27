@@ -1,0 +1,325 @@
+"use client";
+
+import { changeActiveStatus, useGetProfileData } from "@/api/auth";
+import { useGetAllGroups } from "@/api/group";
+import { Eye, Verified } from "@/components/groups/icons";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { ReactNode, useContext, useEffect, useState, useRef } from "react";
+import GroupCreateDialog from "./GroupCreateDialog";
+import { socket, useMyContext } from "@/context/MyContext";
+import { GroupContext } from "@/context/GroupContext";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { PopoverTrigger, Popover, PopoverContent } from "../ui/popover";
+import { iconTextGenerator } from "@/lib/iconTextGenerator";
+import { Edit, Home, LogOut } from "lucide-react";
+import Cookies from "js-cookie";
+import { Badge } from "../ui/badge";
+import StatusDot from "../ui/StatusDot";
+import { Chatroom, GroupTypes, User } from "@/types";
+
+const GroupNav = () => {
+  // const { joinedGroupList } = useGetjoinedGroupList(userId as string);
+  const { currentUser } = useGetProfileData();
+  const { groups } = useGetAllGroups();
+  const { groupNotificationFlag, sendMsgGroupId, groupList, onlineUsers } =
+    useMyContext();
+  const { group: currentGroup, setGroup } = useContext(GroupContext);
+  const { unreadMessages, unreadMessagesRef } = useMyContext();
+  const [activeStatus, setActiveStatus] = useState<User["active_status"]>(
+    currentUser?.active_status
+  );
+  const statuses = useRef<User["active_status"][]>([
+    "online",
+    "offline",
+    "idle",
+    "do not disturb",
+  ]);
+  useEffect(() => {
+    setActiveStatus(currentUser?.active_status);
+  }, [currentUser]);
+  const pathname = usePathname();
+  const settingsItems = [
+    { name: "Edit profile", link: "/public_pages/Profile", icon: <Edit /> },
+    {
+      name: "Logout",
+      link: "#",
+      icon: <LogOut />,
+      action: () => {
+        Cookies.remove("access-token");
+        window.location.href = `${process.env.NEXT_PUBLIC_FRONTEND_URL}/public_pages/signin`;
+      },
+    },
+  ];
+  const groupedUnreadMessages = unreadMessagesRef.current?.reduce(
+    (acc, message) => {
+      if (!message.isRead && message.chatroom?._id) {
+        const chatroomId = message.chatroom._id;
+        if (!acc[chatroomId]) {
+          acc[chatroomId] = {
+            chatroom: message.chatroom,
+            contact: message.contact, // Use 'contact' here instead of 'sender'
+            count: 0,
+          };
+        }
+        acc[chatroomId].count += 1;
+      }
+      return acc;
+    },
+    {} as Record<
+      string,
+      { chatroom: Chatroom; contact?: GroupTypes | User | any; count: number }
+    >
+  );
+
+  return (
+    <nav
+      className="space-y-2  bg-gray-900 p-3 overflow-y-auto overflow-x-hidden h-full mb-5"
+      style={{ scrollbarWidth: "none" }}
+    >
+      <hr className="mx-2 rounded border-t-2 border-t-white/[0.06]" />
+      <div className="items-center">
+        <Popover>
+          <PopoverTrigger>
+            <Avatar className="w-[45px] h-[45px]">
+              <AvatarImage
+                src={currentUser?.profile_pic}
+                className="bg-black w-[50px] h-[50px] rounded-full"
+              />
+              <AvatarFallback>
+                {iconTextGenerator(
+                  currentUser?.firstName as string,
+                  currentUser?.lastName as string
+                )}
+              </AvatarFallback>
+            </Avatar>
+            <StatusDot status={activeStatus!} />
+          </PopoverTrigger>
+
+          <PopoverContent className="text-white bg-[#013a6f] shadow-2xl z-40 gap-1 flex flex-col border-transparent border-l-8 border-l-neutral-400 pl-3 w-auto">
+            <Popover>
+              <PopoverTrigger>
+                <div className="text-white flex p-2 w-full text-[1.1rem] hover:bg-[#6bb7ff73] cursor-pointer rounded-md items-center gap-2 duration-100">
+                  {activeStatus === "online" ? (
+                    <div className="flex items-center gap-2 text-white cursor-pointer relative justify-between">
+                      <StatusDot display="block" status={"online"} />
+                      <span>online</span>
+                    </div>
+                  ) : activeStatus === "offline" ? (
+                    <div className="flex items-center gap-2 text-white cursor-pointer relative justify-between">
+                      <StatusDot display="block" status={"offline"} />
+                      <span>offline</span>
+                    </div>
+                  ) : activeStatus === "idle" ? (
+                    <div className="flex items-center gap-2 text-white cursor-pointer relative justify-between">
+                      <StatusDot display="block" status={"idle"} />
+                      <span>Idle</span>
+                    </div>
+                  ) : activeStatus === "do not disturb" ? (
+                    <div className="flex items-center gap-2 text-white cursor-pointer relative justify-between">
+                      <StatusDot display="block" status={"do not disturb"} />
+                      <span>Do not disturb</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 text-white cursor-pointer relative justify-between">
+                      <StatusDot display="block" status={"online"} />
+                      <span>online</span>
+                    </div>
+                  )}
+                </div>
+              </PopoverTrigger>
+              <PopoverContent className="bg-[#013a6f] flex flex-col gap-1 w-auto">
+                {statuses.current?.map((active_status, index) => (
+                  <span
+                    key={index}
+                    onClick={async () => {
+                      const { status, activeStatus } = await changeActiveStatus(
+                        currentUser?._id!,
+                        active_status!,
+                        socket
+                      );
+                      status && setActiveStatus(activeStatus);
+                    }}
+                    className="p-1 cursor-pointer text-white rounded-md hover:bg-[rgba(255,255,255,0.29)] flex items-center gap-2"
+                  >
+                    <StatusDot display="block" status={active_status!} />
+                    {active_status}
+                  </span>
+                ))}
+              </PopoverContent>
+            </Popover>
+            {settingsItems.map((item, index) => (
+              <Link
+                href={item.link}
+                key={index}
+                className="text-white flex p-2 w-full text-[1rem] hover:bg-[#6bb7ff73] cursor-pointer rounded-md items-center gap-2 duration-100"
+                onClick={item?.action}
+              >
+                {item.icon}
+                {item.name}
+              </Link>
+            ))}
+          </PopoverContent>
+        </Popover>
+      </div>
+
+      {/* {data.map((server) => (
+        <NavLink
+          href={`/Groups/servers/${server.id}/channels/${server.categories[0].channels[0].id}`}
+          key={server.id}
+          // active={params.sid === server.id.toString()}
+        >
+          <Image width={48} height={48} src={`/servers/${server.img}`} alt='' />
+        </NavLink>
+      ))} */}
+
+      {/* 
+            {unreadMessageGroups.map((message) => {
+                const isChannel = message.chatroom.type === 'channel';
+                const profilePic = isChannel ? message.contact?.group_picture : message.contact?.profile_pic;
+                const name = isChannel ? message.contact?.name : message.contact?.username;
+
+                return (
+                    <NavLink key={message.chatroom._id} href={`${isChannel ? `/groups/${message.contact?._id}` : `/groups/direct/${message.chatroom._id}`}`}>
+                        <div className="flex items-center relative">
+                            <img
+                                width={48}
+                                height={48}
+                                src={profilePic || '/default-profile.png'} // Fallback to a default image
+                                className="object-fill w-full h-full"
+                                alt={isChannel ? 'channel' : 'dm'}
+                            />
+                        </div>
+                        <span className="absolute bottom-0 right-0 w-5 h-5 font-extrabold bg-orange-600 rounded-full grid place-content-center z-50">
+                            {message.count}
+                        </span>
+                    </NavLink>
+                );
+            })} */}
+
+      {groupList?.map((group) => {
+        // // Check if the group_id exists in the unread messages
+        // if (unreadGroupIds.has(group.group_id || group?._id)) {
+        //     return null; // Skip rendering this group
+        // }
+
+        return (
+          <NavLink href={`/groups/${group?.group_id}`} key={group.group_id}>
+            {sendMsgGroupId === group?.group_id && groupNotificationFlag && (
+              <div className="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-xl border-2 border-[#d4d6f3]" />
+            )}
+            <Avatar className="w-full h-full">
+              <AvatarImage
+                src={group?.group_picture}
+                className="bg-black  rounded-full"
+              />
+              <AvatarFallback className="bg-gray-700 font-extrabold text-2xl overflow-hidden">
+                {iconTextGenerator(
+                  group?.group_name[0] as string,
+                  group?.group_name[1] as string
+                )}
+              </AvatarFallback>
+            </Avatar>
+          </NavLink>
+        );
+      })}
+
+      <hr className="mx-2 rounded border-t-2 border-t-white/[0.06]" />
+
+      <GeneralLink>
+        <GroupCreateDialog currentUser={currentUser} />
+      </GeneralLink>
+
+      <NavLink href="/groups/direct">
+        <span className="font-extrabold text-lg">DMs</span>
+      </NavLink>
+      <NavLink href="/main">
+        <Home className="h-5 w-7 font-extrabold text-lg" />
+      </NavLink>
+      <NavLink href="/groups/">
+        <Eye className="h-5 w-7" />
+      </NavLink>
+      <hr className="mx-2 rounded border-t-2 border-t-white/[0.06]" />
+      {/* <NavLink href='/groups/'>
+                <Verified className='h-5 w-7' />
+            </NavLink> */}
+    </nav>
+  );
+};
+
+function NavLink({
+  href,
+  children,
+  active,
+}: {
+  href: string;
+  children: ReactNode;
+  active?: boolean;
+}) {
+  let pathName = usePathname();
+  active ||= pathName === href;
+
+  return (
+    <Link href={href} className="group relative block">
+      <div className="absolute -left-3 flex h-full items-center">
+        <div
+          className={`${
+            active
+              ? "h-10"
+              : "h-5 scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"
+          }  w-1 origin-left  rounded-r bg-black transition-all duration-200 `}
+        ></div>
+      </div>
+
+      <div className="group-active:translate-y-px">
+        <div
+          className={`${
+            active
+              ? "rounded-xl bg-brand text-white"
+              : "rounded-xl bg-gray-700 text-gray-100 group-hover:rounded-2xl group-hover:bg-brand group-hover:text-white"
+          } flex h-12 w-12 items-center justify-center overflow-hidden transition-all duration-200`}
+        >
+          {children}
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+export function GeneralLink({
+  children,
+  active,
+}: {
+  children: ReactNode;
+  active?: boolean;
+}) {
+  let pathName = usePathname();
+
+  return (
+    <>
+      <div className="absolute -left-3 flex h-full items-center">
+        <div
+          className={`${
+            active
+              ? "h-10"
+              : "h-5 scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"
+          }  w-1 origin-left  rounded-r bg-gray-900 transition-all duration-200 `}
+        ></div>
+      </div>
+
+      <div className="group-active:translate-y-px">
+        <div
+          className={`${
+            active
+              ? "rounded-xl bg-brand text-white"
+              : "rounded-xl bg-gray-700 text-gray-100 group-hover:rounded-2xl group-hover:bg-brand group-hover:text-white"
+          } flex h-12 w-12 items-center justify-center overflow-hidden transition-all duration-200`}
+        >
+          {children}
+        </div>
+      </div>
+    </>
+  );
+}
+
+export default GroupNav;

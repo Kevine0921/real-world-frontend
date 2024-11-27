@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: rgb(0, 0, 0);
+  --background-start-rgb: rgb(214, 219, 220);
+  --background-end-rgb: rgb(255, 255, 255);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+*{
+  font-size: 0.95rem;
+}
+
+body {
+  color: var(--foreground-rgb);
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+button{
+  @apply disabled:cursor-not-allowed
+}
+
+::-webkit-scrollbar{
+  width: 7px;
+  background: rgb(0, 128, 255);
+}
+
+::-webkit-scrollbar-thumb{
+  background: rgb(255, 255, 255);
+  border-radius:10px  ;
+}
+
+
+.message-body ul {
+    list-style-type: disc; /* Default bullet */
+    padding-left: 20px; /* Indent the list */
+}
+
+.message-body ol {
+    list-style-type: decimal; /* Default numbering */
+    padding-left: 20px; /* Indent the list */
+}
+
+
+.ql-toolbar {
+  padding: 15px !important;
+  border: 5px !important; 
+}
+
+.ql-toolbar * {
+  border-bottom: 2px !important;
+  border-top: none !important;
+}
+
+.ql-editor {
+  z-index: 50000 !important;
+  max-height: 500px !important;
+}
+
+
+.ql-editor.ql-blank::before {
+    color: rgb(164, 164, 164) !important;
+}
+
+.ql-toolbar .ql-stroke {
+    fill: none;
+    stroke: rgb(164, 164, 164) !important;
+}
+
+.ql-toolbar .ql-fill {
+    fill: rgb(164, 164, 164) !important;
+    stroke: none ;
+}
+
+.ql-toolbar .ql-picker {
+    color: rgb(164, 164, 164) !important;
+}
+
+.ql-toolbar .ql-picker:hover{
+  color: blue !important;
+}
+
+.ql-toolbar .ql-fill:hover{
+  color:blue !important;
+}
+
+.ql-toolbar .ql-stroke:hover{
+  color:blue !important;
+}
