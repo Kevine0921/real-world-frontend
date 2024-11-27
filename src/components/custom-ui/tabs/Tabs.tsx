@@ -28,7 +28,7 @@ const Tabs: FC<
         })}
       </div>
 
-      <div>{data?.[currentIndex]?.content ?? null}</div>
+      <div className="mt-2">{data?.[currentIndex]?.content ?? null}</div>
     </div>
   );
 };

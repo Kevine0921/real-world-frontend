@@ -7,6 +7,7 @@ import Tabs from "../custom-ui/tabs";
 import GroupSearchBox from "./GroupSearchBox";
 import MemberList from "./MemberList";
 import GroupTitleCard from "./GroupTitleCard";
+import GroupInbox from "./GroupInbox";
 
 const RightSidebar: FC<
   PropsWithChildren<{
@@ -33,7 +34,10 @@ const RightSidebar: FC<
 
         <Tabs
           data={[
-            { label: <BsInbox size={"20px"} />, content: <div></div> },
+            {
+              label: <BsInbox size={"20px"} />,
+              content: <GroupInbox group={group} />,
+            },
             {
               label: <FiUsers size={"20px"} />,
               content: (
