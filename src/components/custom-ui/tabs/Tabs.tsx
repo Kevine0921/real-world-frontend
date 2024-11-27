@@ -16,7 +16,7 @@ const Tabs: FC<
               key={itemIndex}
               className={
                 "cursor-pointer p-2 " +
-                (isActive ? "border-b-4 border-slate-200" : "")
+                (isActive ? "border-b-4 border-slate-200" : "hover:border-b-2 border-slate-200")
               }
               onClick={() => setCurrentIndex(itemIndex)}
             >
