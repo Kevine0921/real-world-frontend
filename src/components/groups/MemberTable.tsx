@@ -1,10 +1,7 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { GroupContext } from "@/context/GroupContext";
-import { iconTextGenerator } from "@/lib/iconTextGenerator";
-import { User } from "@/types";
-import { Search, X } from "lucide-react";
-import React, { useContext, useState } from "react";
 import GroupMemberItem from "@/components/groups/GroupMemberItem";
+import { GroupContext } from "@/context/GroupContext";
+import { User } from "@/types";
+import { useContext, useState } from "react";
 
 type Props = {
   isLoading: boolean;
@@ -13,7 +10,7 @@ type Props = {
   members: User[];
 };
 
-function MemberList({ admins, moderators, members, isLoading }: Props) {
+function MemberTable({ admins, moderators, members, isLoading }: Props) {
   const {
     group,
     privateChannelMembers,
@@ -25,33 +22,12 @@ function MemberList({ admins, moderators, members, isLoading }: Props) {
 
   return (
     <div
-      className={`w-[25%] bg-gray-800 overflow-hidden ${
+      className={`w-full h-full overflow-hidden ${
         isSideBarOpen && windowWidth! <= 1025
           ? "block absolute w-full top-0 left-0 bg-blue-500 h-full"
           : "hidden"
       } lg:block`}
     >
-      {/* Search Bar */}
-      <div className="flex items-center mt-2  rounded-full bg-gray-900 sticky top-0 z-20 p-2 justify-between text-neutral-200 w-full">
-        {isSideBarOpen && (
-          <span
-            className="p-2 cursor-pointer"
-            onClick={() => setIsSideBarOpen(false)}
-          >
-            <X />
-          </span>
-        )}
-        <input
-          name="q"
-          onChange={(e) => setQ(e.target.value)}
-          className="bg-transparent outline-none w-full"
-          placeholder="Search"
-        />
-        <Search />
-      </div>
-      <div className="pt-4 ">
-        {/* <hr className=" rounded border border-gray-500" /> */}
-      </div>
       <div className="text-center p-2">{group?.group_name}</div>
       <div className="text-center ">{members?.length}</div>
       <>
@@ -185,4 +161,4 @@ function MemberList({ admins, moderators, members, isLoading }: Props) {
   );
 }
 
-export default MemberList;
+export default MemberTable;

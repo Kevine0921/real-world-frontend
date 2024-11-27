@@ -1,17 +1,16 @@
 "use client";
-import React, { useContext, useEffect } from "react";
-import Aside from "./Aside";
-import { useParams, usePathname, useRouter } from "next/navigation";
-import { useGetGroup } from "@/api/group";
-import { GroupContext } from "@/context/GroupContext";
-import MemberList from "./MemberList";
-import MainLoader from "@/components/MainLoader";
-import Error from "@/components/Error";
-import { toast } from "sonner";
-import { useGetGroupChannels } from "@/api/channel";
-import { useMyContext } from "@/context/MyContext";
 import { useGetProfileData } from "@/api/auth";
-import LeftSideBar from "@/components/groups/LeftSideBar";
+import { useGetGroupChannels } from "@/api/channel";
+import { useGetGroup } from "@/api/group";
+import Error from "@/components/Error";
+import MainLoader from "@/components/MainLoader";
+import RightSidebar from "@/components/groups/RightSidebar";
+import { GroupContext } from "@/context/GroupContext";
+import { useMyContext } from "@/context/MyContext";
+import { useParams, usePathname, useRouter } from "next/navigation";
+import React, { useContext, useEffect } from "react";
+import { toast } from "sonner";
+import Aside from "./Aside";
 
 type Props = {
   children: React.ReactNode;
@@ -60,26 +59,28 @@ function GroupIdLayout({ children }: Props) {
     }
   }, [channelList]);
 
-  if (!group?._id) return <MainLoader />;
-  if (groupsLoading) return <MainLoader />;
-  if (isError) return <Error />;
-
-  return (
+  return isError ? (
+    <Error />
+  ) : !group?._id || groupsLoading ? (
+    <MainLoader />
+  ) : (
     <div className="flex w-full text-neutral-200">
       <Aside />
       <div className="flex-grow bg-gray-900 flex">
         <div className="w-full sm:w-[75%] md:w-[70%] lg:w-[65%] xl:w-[85%] overflow-auto flex-grow relative">
           {children}
         </div>
-        {!pathname.includes("/dashboard") && (
-          <MemberList
-            isLoading={isLoading}
+        {!pathname.includes("/dashboard") ? (
+          <RightSidebar
+            groupId={groupId}
+            group={group}
             admins={admins}
             moderators={moderators}
             members={members}
+            isLoading={isLoading}
           />
-          // <LeftSideBar />
-        )}
+        ) : // <LeftSideBar />
+        null}
       </div>
     </div>
   );
