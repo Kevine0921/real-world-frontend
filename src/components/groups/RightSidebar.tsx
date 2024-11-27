@@ -6,6 +6,7 @@ import { FiUsers } from "react-icons/fi";
 import Tabs from "../custom-ui/tabs";
 import GroupSearchBox from "./GroupSearchBox";
 import MemberList from "./MemberList";
+import GroupTitleCard from "./GroupTitleCard";
 
 const RightSidebar: FC<
   PropsWithChildren<{
@@ -28,6 +29,8 @@ const RightSidebar: FC<
     <div className="flex-grow flex flex-col items-stretch gap-2 p-2  bg-gray-800">
       <GroupSearchBox />
       <div className="flex-grow">
+        <GroupTitleCard group={group} />
+
         <Tabs
           data={[
             { label: <BsInbox size={"20px"} />, content: <div></div> },
@@ -44,7 +47,21 @@ const RightSidebar: FC<
                 />
               ),
             },
-            { label: <BsSearch size={"20px"} />, content: <div></div> },
+            {
+              label: <BsSearch size={"20px"} />,
+              content: (
+                <div>
+                  <MemberList
+                    groupId={groupId}
+                    group={group}
+                    admins={admins}
+                    moderators={moderators}
+                    members={members}
+                    isLoading={isLoading}
+                  />
+                </div>
+              ),
+            },
           ]}
         />
       </div>

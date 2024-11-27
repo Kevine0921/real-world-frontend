@@ -707,8 +707,9 @@ function Page({}: Props) {
   };
 
   useEffect(() => {
-    setRoomId(channel?.chatroom?._id as string);
-    console.log("chanel chantroom id", channel?.chatroom);
+    if (channel?.chatroom?._id) {
+      setRoomId(channel?.chatroom?._id as string);
+    }
   }, [channel, params]);
 
   useEffect(() => {
